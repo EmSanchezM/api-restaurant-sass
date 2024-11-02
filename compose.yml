@@ -1,0 +1,16 @@
+services:
+  surrealdb:
+    image: surrealdb/surrealdb:latest
+    container_name: surrealdb_restaurant
+    command: start --user root --pass root123 file:/data/database.db --auth --bind 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    volumes:
+      - surrealdb_data:/data
+    environment:
+      - SURREAL_USER=root
+      - SURREAL_PASS=root123
+    restart: unless-stopped
+
+volumes:
+  surrealdb_data:
