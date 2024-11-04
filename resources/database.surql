@@ -9,6 +9,7 @@ DEFINE FIELD password ON user TYPE string ASSERT $value != NONE;
 DEFINE FIELD status ON user TYPE string;
 DEFINE FIELD user_type ON user TYPE string;
 DEFINE FIELD is_verified ON user TYPE bool DEFAULT false;
+DEFINE FIELD is_active ON user TYPE bool DEFAULT true;
 DEFINE FIELD failed_login_attempts ON user TYPE int DEFAULT 0;
 DEFINE FIELD created_at ON user TYPE datetime DEFAULT time::now();
 DEFINE FIELD updated_at ON user TYPE datetime DEFAULT time::now();
@@ -53,6 +54,7 @@ DEFINE FIELD emergency_contact ON profile TYPE option<object {
   phone: string,
   relationship: string
 }>;
+DEFINE FIELD is_active ON profile TYPE bool DEFAULT true;
 DEFINE FIELD created_at ON profile TYPE datetime DEFAULT time::now();
 DEFINE FIELD updated_at ON profile TYPE datetime DEFAULT time::now();
 
@@ -86,6 +88,7 @@ DEFINE TABLE permission SCHEMAFULL;
 DEFINE FIELD name ON permission TYPE string;
 DEFINE FIELD description ON permission TYPE string;
 DEFINE FIELD resource ON permission TYPE string;
+DEFINE FIELD is_active ON permission TYPE bool DEFAULT true;
 DEFINE FIELD action ON permission TYPE string
     ASSERT $value INSIDE [
         'create',
