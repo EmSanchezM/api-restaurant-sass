@@ -1,5 +1,4 @@
 use thiserror::Error;
-use std::fmt;
 use serde::Serialize;
 
 #[derive(Serialize)]
@@ -33,17 +32,17 @@ pub enum Error {
   #[error("Invalid email format")]
   InvalidEmail,
 
-  #[error("{}", .0.as_ref().unwrap_or("Failed to create user"))]
-  UserCreationError(Option<String>),
+  #[error("Failed to create user: {0}")]
+  UserCreationError(String),
 
-  #[error("{}", .0.as_ref().unwrap_or("Failed to update user"))]
-  UserUpdateError(Option<String>),
+  #[error("Failed to update user: {0}")]
+  UserUpdateError(String),
 
-  #[error("{}", .0.as_ref().unwrap_or("Failed to delete user"))]
-  UserDeletionError(Option<String>),
+  #[error("Failed to delete user: {0}")]
+  UserDeletionError(String),
 
-  #[error("{}", .0.as_ref().unwrap_or("Failed to fetch users"))]
-  UserFetchError(Option<String>),
+  #[error("Failed to fetch users: {0}")]
+  UserFetchError(String),
 
   // Errores de registro y operaciones
   #[error("Registration failed")]
@@ -81,7 +80,7 @@ pub enum Error {
 
   #[error("Invalid operation")]
   InvalidOperation,
-  
+
   // Errores de base de datos
   #[error("Database error: {0}")]
   DatabaseError(String),
@@ -120,10 +119,13 @@ pub enum Error {
   #[error("Creation failed")]
   CreationFailed,
 
+  #[error("Config error: {0}")]
+  ConfigError(String),
+
+  #[error("Token generation error: {0}")]
+  TokenGenerationError(String),
+
   // Wrapper para errores externos
-  #[error(transparent)]
-  SurrealError(#[from] surrealdb::Error),
-  
   #[error(transparent)]
   ValidationErrors(#[from] validator::ValidationErrors),
   
@@ -187,6 +189,8 @@ impl actix_web::error::ResponseError for Error {
       Error::IOError(_) => StatusCode::INTERNAL_SERVER_ERROR,
       Error::InternalServerError => StatusCode::INTERNAL_SERVER_ERROR,
       Error::Unknown => StatusCode::INTERNAL_SERVER_ERROR,
+      Error::ConfigError(_) => StatusCode::INTERNAL_SERVER_ERROR,
+      Error::TokenGenerationError(_) => StatusCode::INTERNAL_SERVER_ERROR,
       _ => StatusCode::INTERNAL_SERVER_ERROR,
     }
   }

@@ -152,6 +152,13 @@ CREATE role:admin SET
   hierarchy_level = 2,
   created_at = $timestamp;
 
+-- Crear rol customer
+CREATE role:customer SET 
+  name = 'customer',
+  description = 'Customer with limited access',
+  hierarchy_level = 3,
+  created_at = $timestamp;
+
 -- Crear permisos básicos
 CREATE permission SET 
   name = 'users.manage',

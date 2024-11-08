@@ -14,6 +14,12 @@ pub struct Permission {
   pub created_at: DateTime<Utc>,
 }
 
+impl Permission {
+  pub fn new(name: String, description: String, resource: Resource, action: Action) -> Self {
+    Self { surreal_id: SurrealId::generate("permission"), name, description, resource, action, created_at: Utc::now() }
+  }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Resource {
   Orders,

@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use std::fmt;
+use uuid::Uuid;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SurrealId {
@@ -21,6 +22,13 @@ impl SurrealId {
 
   pub fn id(&self) -> &str {
     &self.id
+  }
+
+  pub fn generate(tb: &str) -> Self {
+    Self {
+      tb: tb.to_string(),
+      id: Uuid::new_v4().to_string(),
+    }
   }
 }
 

@@ -19,3 +19,22 @@ pub struct Profile {
   pub created_at: DateTime<Utc>,
   pub updated_at: DateTime<Utc>,
 }
+
+impl Profile {
+  pub fn new(user_id: SurrealId, first_name: String, last_name: String, phone: String, address: Address, position: Option<String>, avatar: Option<String>, emergency_contact: Option<EmergencyContact>, birth_date: DateTime<Utc>) -> Self {
+    Self { 
+      surreal_id: SurrealId::generate("profile"),
+      user_id, 
+      first_name, 
+      last_name,
+      phone, 
+      address, 
+      position, 
+      birth_date, 
+      avatar, 
+      emergency_contact, 
+      created_at: Utc::now(), 
+      updated_at: Utc::now() 
+    }
+  }
+}

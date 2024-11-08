@@ -1,20 +1,23 @@
 use async_trait::async_trait;
 use surrealdb::Surreal;
-use surrealdb::engine::remote::ws::Ws;
+use surrealdb::engine::remote::ws::Client;
+use std::sync::Arc;
 
 use crate::domain::entities::token::RefreshToken;
 use crate::domain::repositories::token_repository::TokenRepository;
 use crate::domain::error::Error;
 use crate::domain::value_objects::surreal_id::SurrealId;
+use crate::infrastructure::database::surreal_connection::DatabaseConnection;
 
 pub struct SurrealTokenRepository {
-  db: Surreal<Ws>,
+  db: Arc<Surreal<Client>>,
 }
 
-
 impl SurrealTokenRepository {
-  pub fn new(db: Surreal<Ws>) -> Self {
-    Self { db }
+  pub fn new(connection: &DatabaseConnection) -> Self {
+    Self { 
+      db: connection.get_client()
+    }
   }
 }
 
@@ -72,14 +75,14 @@ impl TokenRepository for SurrealTokenRepository {
     let _: Option<RefreshToken> = self.db
       .query(r#"
         UPDATE refresh_token 
-        SET 
+        SET
           is_valid = false,
           updated_at = time::now()
         WHERE user_id = $user_id
       "#)
-      .bind(("user_id", user_id))
-    .await?
-    .take(0)?;
+      .bind(("user_id", user_id.id()))
+      .await?
+      .take(0)?;
 
     Ok(())
   }

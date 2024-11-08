@@ -1,3 +1,5 @@
+use crate::domain::value_objects::{surreal_id::SurrealId, user_types::UserType};
+
 pub struct RegisterRequest {
   pub email: String,
   pub password: String,

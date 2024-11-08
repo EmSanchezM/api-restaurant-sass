@@ -2,6 +2,7 @@ use async_trait::async_trait;
 
 use crate::domain::entities::token::RefreshToken;
 use crate::domain::value_objects::surreal_id::SurrealId;
+use crate::domain::error::Error;
 
 #[async_trait]
 pub trait TokenRepository {
