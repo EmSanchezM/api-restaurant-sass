@@ -75,7 +75,7 @@ impl PermissionRepository for SurrealPermissionRepository {
     }
   }
 
-  async fn find_by_id(&self, id: &SurrealId) -> Result<Permission, Error> {
+  async fn find_by_id(&self, id: &SurrealId) -> Result<Option<Permission>, Error> {
     let result: Option<Permission> = self.db
       .query(r#"
         SELECT * FROM permission 
@@ -85,7 +85,7 @@ impl PermissionRepository for SurrealPermissionRepository {
       .await?
       .take(0)?;
     
-    result.ok_or(Error::PermissionNotFound)
+    Ok(result)
   }
 
   async fn find_all(&self) -> Result<Vec<Permission>, Error> {

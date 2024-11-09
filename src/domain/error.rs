@@ -81,6 +81,12 @@ pub enum Error {
   #[error("Invalid operation")]
   InvalidOperation,
 
+  #[error("Invalid resource")]
+  InvalidResource,
+
+  #[error("Invalid action")]
+  InvalidAction,
+
   // Errores de base de datos
   #[error("Database error: {0}")]
   DatabaseError(String),

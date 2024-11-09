@@ -28,12 +28,15 @@ impl TokenRepository for SurrealTokenRepository {
       .query(r#"
         CREATE refresh_token SET
           token = $token,
+          access_token = $access_token,
           user_id = $user_id,
           expires_at = $expires_at,
           created_at = time::now(),
-          is_valid = true
+          used = false,
+          invalidated = false
       "#)
       .bind(("token", &refresh_token.token))
+      .bind(("access_token", &refresh_token.access_token))
       .bind(("user_id", &refresh_token.user_id))
       .bind(("expires_at", &refresh_token.expires_at))
       .await?
@@ -44,7 +47,7 @@ impl TokenRepository for SurrealTokenRepository {
 
   async fn find_refresh_token(&self, token: &str) -> Result<Option<RefreshToken>, Error> {
     let refresh_token: Option<RefreshToken> = self.db
-      .query("SELECT * FROM refresh_token WHERE token = $token AND is_valid = true")
+      .query("SELECT * FROM refresh_token WHERE token = $token AND invalidated = false")
       .bind(("token", token))
       .await?
       .take(0)?;
@@ -52,16 +55,16 @@ impl TokenRepository for SurrealTokenRepository {
     Ok(refresh_token)
   }
 
-  async fn invalidate_refresh_token(&self, token: &str) -> Result<(), Error> {
+  async fn invalidate_refresh_token(&self, user_id: &SurrealId) -> Result<(), Error> {
     let result: Option<RefreshToken> = self.db
       .query(r#"
         UPDATE refresh_token 
         SET 
-          is_valid = false,
+          invalidated = true,
           updated_at = time::now()
-        WHERE token = $token
+        WHERE user_id = $user_id
       "#)
-      .bind(("token", token))
+      .bind(("user_id", user_id.id()))
       .await?
       .take(0)?;
 
@@ -76,7 +79,7 @@ impl TokenRepository for SurrealTokenRepository {
       .query(r#"
         UPDATE refresh_token 
         SET
-          is_valid = false,
+          invalidated = true,
           updated_at = time::now()
         WHERE user_id = $user_id
       "#)

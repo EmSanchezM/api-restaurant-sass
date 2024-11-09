@@ -116,9 +116,11 @@ impl RoleRepository for SurrealRoleRepository {
   async fn delete(&self, id: &SurrealId) -> Result<(), Error> {
     let result: Option<Role> = self.db
       .query(r#"
-        DELETE role WHERE id = type::thing("role", $id)
+        UPDATE type::thing($tb, $id) SET
+          is_active = false
       "#)
-      .bind(("id", id.id().to_string()))
+      .bind(("tb", id.table()))
+      .bind(("id", id.id()))
       .await?
       .take(0)?;
 

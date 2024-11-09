@@ -53,7 +53,7 @@ impl ProfileRepository for SurrealProfileRepository {
   async fn update(&self, id: &SurrealId, profile: &Profile) -> Result<Profile, Error> {
     let result: Option<Profile> = self.db
       .query(r#"
-        UPDATE type::thing($tb, $id) 
+        UPDATE type::thing("profile", $id) 
         SET
           first_name = $first_name,
           last_name = $last_name,
@@ -64,7 +64,6 @@ impl ProfileRepository for SurrealProfileRepository {
           emergency_contact = $emergency_contact,
           updated_at = time::now()
       "#)
-      .bind(("tb", id.table()))
       .bind(("id", id.id()))
       .bind(("first_name", &profile.first_name))
       .bind(("last_name", &profile.last_name))
@@ -82,12 +81,11 @@ impl ProfileRepository for SurrealProfileRepository {
   async fn delete(&self, id: &SurrealId) -> Result<(), Error> {
     let result: Option<Profile> = self.db
       .query(r#"
-        UPDATE type::thing($tb, $id) 
+        UPDATE type::thing("profile", $id) 
         SET
           is_active = false,
           updated_at = time::now()
       "#)
-      .bind(("tb", id.table()))
       .bind(("id", id.id()))
       .await?
       .take(0)?;
@@ -100,8 +98,7 @@ impl ProfileRepository for SurrealProfileRepository {
 
   async fn find_by_id(&self, id: &SurrealId) -> Result<Option<Profile>, Error> {
     let profile: Option<Profile> = self.db
-      .query("SELECT * FROM profile type::thing($tb, $id)")
-      .bind(("tb", id.table()))
+      .query(r#"SELECT * FROM profile type::thing("profile", $id)"#)
       .bind(("id", id.id()))
       .await?
       .take(0)?;
@@ -111,8 +108,7 @@ impl ProfileRepository for SurrealProfileRepository {
 
   async fn find_by_user_id(&self, user_id: &SurrealId) -> Result<Option<Profile>, Error> {
     let profile: Option<Profile> = self.db
-      .query("SELECT * FROM profile WHERE user_id = type::thing($tb, $id)")
-      .bind(("tb", user_id.table()))
+      .query(r#"SELECT * FROM profile WHERE user_id = type::thing("profile", $id)"#)
       .bind(("id", user_id.id()))
       .await?
       .take(0)?;
