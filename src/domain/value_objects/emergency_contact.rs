@@ -6,3 +6,9 @@ pub struct EmergencyContact {
   pub phone: String,
   pub relationship: String,
 }
+
+impl EmergencyContact {
+  pub fn new(name: String, phone: String, relationship: String) -> Self {
+    Self { name, phone, relationship }
+  }
+}

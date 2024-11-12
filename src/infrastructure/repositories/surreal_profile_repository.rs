@@ -108,7 +108,9 @@ impl ProfileRepository for SurrealProfileRepository {
 
   async fn find_by_user_id(&self, user_id: &SurrealId) -> Result<Option<Profile>, Error> {
     let profile: Option<Profile> = self.db
-      .query(r#"SELECT * FROM profile WHERE user_id = type::thing("profile", $id)"#)
+      .query(r#"
+        SELECT * FROM profile WHERE user_id = type::thing("profile", $id)
+      "#)
       .bind(("id", user_id.id()))
       .await?
       .take(0)?;
