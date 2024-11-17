@@ -2,14 +2,17 @@ services:
   surrealdb:
     image: surrealdb/surrealdb:latest
     container_name: surrealdb_restaurant
-    command: start --user root --pass root123 file:/data/database.db --auth --bind 0.0.0.0:8000
+    user: "root:root"
+    command: start --username root --password root123 rocksdb:/data/database
     ports:
       - "8000:8000"
     volumes:
+      - ./resources:/app/resources
       - surrealdb_data:/data
     environment:
       - SURREAL_USER=root
       - SURREAL_PASS=root123
+      - OTEL_SDK_DISABLED=true
     restart: unless-stopped
 
 volumes:
