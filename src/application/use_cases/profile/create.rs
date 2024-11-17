@@ -1,10 +1,13 @@
+use std::str::FromStr;
+
 use crate::domain::entities::profile::Profile;
 use crate::domain::repositories::profile_repository::ProfileRepository;
 use crate::application::dtos::profile::create_profile_request::CreateProfileRequest;
 use crate::application::dtos::profile::profile_response::ProfileResponse;
 use crate::domain::error::Error;
 
-use crate::domain::value_objects::surreal_id::SurrealId;
+use surrealdb::sql::Thing;
+
 use crate::domain::services::token::TokenService;
 
 pub struct CreateProfileUseCase<T> where T: ProfileRepository {
@@ -23,8 +26,8 @@ impl<T> CreateProfileUseCase<T> where T: ProfileRepository {
     if self.token_service.is_token_expired(&claims) {
       return Err(Error::TokenExpired);
     }
-
-    let user_id = SurrealId::new("user", claims.sub.as_str());
+    
+    let user_id = Thing::from_str(claims.sub.as_str()).unwrap();
 
     let new_profile = Profile::new(
       user_id,
@@ -40,9 +43,11 @@ impl<T> CreateProfileUseCase<T> where T: ProfileRepository {
     
     let profile = self.profile_repository.create(&new_profile).await?;
 
+    //TODO: Actualizar el user con el profile
+
     Ok(ProfileResponse { 
-      id: profile.surreal_id.id().to_string(),
-      user_id: profile.user_id.id().to_string(),
+      id: profile.id.clone().unwrap().id.to_string(),
+      user_id: profile.user_id.to_string(),
       first_name: profile.first_name,
       last_name: profile.last_name,
       phone: profile.phone,

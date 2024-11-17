@@ -3,10 +3,10 @@ use std::time::Duration;
 use serde::{Serialize, Deserialize};
 use chrono::Utc;
 use uuid::Uuid;
+use surrealdb::sql::Thing;
 
 use crate::domain::entities::token::RefreshToken;
 use crate::domain::entities::user::User;
-use crate::domain::value_objects::surreal_id::SurrealId;
 use crate::domain::error::Error;
 
 #[derive(Debug)]
@@ -28,7 +28,7 @@ pub struct TokenClaims {
 #[derive(Debug, Clone)]
 pub struct TokenConfig {
   pub access_token_secret: String,
-  pub refresh_token_secret: String,
+  //pub refresh_token_secret: String,
   pub access_token_duration: Duration,
   pub refresh_token_duration: Duration,
 }
@@ -55,9 +55,9 @@ impl TokenService {
 
   pub fn generate_access_token(&self, user: &User) -> Result<String, Error> {
     let expiration = Utc::now() + self.config.access_token_duration;
-    
+
     let claims = TokenClaims {
-      sub: user.surreal_id.id().to_string(),
+      sub: user.id.clone().unwrap().id.to_string(),
       email: user.email.clone(),
       roles: user.roles.as_ref().map(|r| r.iter().map(|role| role.name.clone()).collect()).unwrap_or_default(),
       permissions: user.permissions.as_ref().map(|p| p.iter().map(|perm| perm.name.clone()).collect()),
@@ -75,8 +75,8 @@ impl TokenService {
 
   pub fn generate_refresh_token(&self, user: &User) -> Result<RefreshToken, Error> {
     let refresh_token = RefreshToken {
-      surreal_id: SurrealId::generate("refresh_token"),
-      user_id: user.surreal_id.clone(),
+      id: None,
+      user_id: user.id.clone().unwrap(),
       access_token: Uuid::new_v4().to_string(),
       used: false,
       invalidated: false,

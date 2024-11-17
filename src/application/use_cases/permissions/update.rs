@@ -1,7 +1,6 @@
 use std::str::FromStr;
 
 use crate::domain::entities::permission::Permission;
-use crate::domain::value_objects::surreal_id::SurrealId;
 use crate::domain::repositories::permission_repository::PermissionRepository;
 use crate::domain::error::Error;
 use crate::domain::entities::permission::{Resource, Action};
@@ -18,8 +17,7 @@ impl<T> UpdatePermissionUseCase<T> where T: PermissionRepository {
   }
 
   pub async fn execute(&self, id: &str, request: &UpdatePermissionRequest) -> Result<PermissionResponse, Error> {
-    let permission_id = SurrealId::new("permission", id);
-    let permission = self.permission_repository.find_by_id(&permission_id).await?;
+    let permission = self.permission_repository.find_by_id(id.to_string()).await?;
 
     match permission {
       None => return Err(Error::PermissionNotFound),
@@ -33,10 +31,10 @@ impl<T> UpdatePermissionUseCase<T> where T: PermissionRepository {
           resource,
           action
         );
-        let updated_permission = self.permission_repository.update(&permission.surreal_id, &payload).await?;
+        let updated_permission = self.permission_repository.update(permission.id.clone().unwrap().id.to_string(), &payload).await?;
         
         Ok(PermissionResponse {
-          id: updated_permission.surreal_id.id().to_string(),
+          id: updated_permission.id.clone().unwrap().id.to_string(),
           name: updated_permission.name,
           description: updated_permission.description,
           resource: updated_permission.resource.to_string(),

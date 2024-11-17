@@ -1,6 +1,8 @@
+use std::str::FromStr;
+use surrealdb::sql::Thing;
+
 use crate::domain::repositories::profile_repository::ProfileRepository;
 use crate::domain::error::Error;
-use crate::domain::value_objects::surreal_id::SurrealId;
 use crate::domain::services::token::TokenService;
 
 pub struct RemoveProfileUseCase<T> where T: ProfileRepository {
@@ -20,14 +22,14 @@ impl<T> RemoveProfileUseCase<T> where T: ProfileRepository {
       return Err(Error::TokenExpired);
     }
 
-    let user_id = SurrealId::new("user", claims.sub.as_str());
+    let user_id = Thing::from_str(claims.sub.as_str()).unwrap();
 
-    let profile = self.profile_repository.find_by_user_id(&user_id).await?;
+    let profile = self.profile_repository.find_by_user_id(user_id.to_string()).await?;
 
     match profile {
       None => return Err(Error::ProfileNotFound),
       Some(profile) => {
-        self.profile_repository.delete(&profile.surreal_id).await?;
+        self.profile_repository.delete(profile.id.clone().unwrap().id.to_string()).await?;
         Ok(())
       }
     }

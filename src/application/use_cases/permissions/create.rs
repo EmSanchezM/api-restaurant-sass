@@ -30,11 +30,11 @@ impl<T> CreatePermissionUseCase<T> where T: PermissionRepository {
     let permission = self.permission_repository.create(&new_permission).await?;
 
     Ok(PermissionResponse { 
-      id: permission.surreal_id.to_string(),
-      name: permission.name,
-      description: permission.description,
-      resource: permission.resource.to_string(),
-      action: permission.action.to_string(),
+      id: permission.id.clone().unwrap().id.to_string(),
+      name: permission.name.clone(),
+      description: permission.description.clone(),
+      resource: permission.resource.clone().to_string(),
+      action: permission.action.clone().to_string(),  
       is_active: permission.is_active,
       created_at: permission.created_at
     })

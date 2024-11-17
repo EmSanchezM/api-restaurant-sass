@@ -1,4 +1,3 @@
-use crate::domain::value_objects::surreal_id::SurrealId;
 use crate::domain::repositories::profile_repository::ProfileRepository;
 use crate::application::dtos::profile::profile_response::ProfileResponse;
 use crate::domain::error::Error;
@@ -13,14 +12,13 @@ impl<T> GetProfileByIdUseCase<T> where T: ProfileRepository {
   }
 
   pub async fn execute(&self, id: &str) -> Result<ProfileResponse, Error> {
-    let profile_id = SurrealId::new("profile", id);
-    let profile = self.profile_repository.find_by_id(&profile_id).await?;
+    let profile = self.profile_repository.find_by_id(id.to_string()).await?;
     
     match profile {
       None => Err(Error::ProfileNotFound),
       Some(profile) => Ok(ProfileResponse {
-        id: profile.surreal_id.id().to_string(),
-        user_id: profile.user_id.id().to_string(),
+        id: profile.id.clone().unwrap().id.to_string(),
+        user_id: profile.user_id.to_string(),
         first_name: profile.first_name,
         last_name: profile.last_name,
         phone: profile.phone,

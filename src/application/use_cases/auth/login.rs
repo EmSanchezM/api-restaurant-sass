@@ -38,7 +38,7 @@ where
       .await?;
 
     Ok(LoginResponse {
-      user_id: user.surreal_id.id().to_string(),
+      user_id: user.id.clone().unwrap().id.to_string(),
       email: user.email,
       access_token: token_pair.access_token,
       refresh_token: token_pair.refresh_token.token,

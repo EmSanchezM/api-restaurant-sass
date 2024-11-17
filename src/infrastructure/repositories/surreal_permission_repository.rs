@@ -5,7 +5,6 @@ use std::sync::Arc;
 
 use crate::domain::entities::permission::Permission;
 use crate::domain::repositories::permission_repository::PermissionRepository;
-use crate::domain::value_objects::surreal_id::SurrealId;
 use crate::domain::error::Error;
 
 use crate::infrastructure::database::surreal_connection::DatabaseConnection;
@@ -25,47 +24,32 @@ impl SurrealPermissionRepository {
 #[async_trait]
 impl PermissionRepository for SurrealPermissionRepository {
   async fn create(&self, permission: &Permission) -> Result<Permission, Error> {
-    let result: Option<Permission> = self.db
-      .query(r#"
-        CREATE permission SET
-          name = $name,
-          description = $description,
-          resource = $resource,
-          action = $action,
-          is_active = true,
-          created_at = time::now()
-      "#)
-      .bind(("name", &permission.name))
-      .bind(("description", &permission.description))
-      .bind(("resource", &permission.resource))
-      .bind(("action", &permission.action))
-      .await?
-      .take(0)?;
+    let result: Option<Permission> = self.db.create("permissions").content(permission.clone()).await?;
 
     result.ok_or(Error::CreationFailed)
   }
 
-  async fn find_role_permissions(&self, role_id: &SurrealId) -> Result<Vec<Permission>, Error> {
+  async fn find_role_permissions(&self, role_id: String) -> Result<Vec<Permission>, Error> {
     let permissions: Vec<Permission> = self.db
       .query(r#"
         SELECT permission.* FROM role_permission
         RELATE type::thing("role", $role_id) -> role_permission -> permission
         WHERE permission.is_active = true
       "#)
-      .bind(("role_id", role_id.id().to_string()))
+      .bind(("role_id", role_id.clone()))
       .await?
       .take(0)?;
 
     Ok(permissions)
   }
 
-  async fn assign_permission_to_role(&self, role_id: &SurrealId, permission_id: &SurrealId) -> Result<(), Error> {
+  async fn assign_permission_to_role(&self, role_id: String, permission_id: String) -> Result<(), Error> {
     let result: Option<()> = self.db
       .query(r#"
         RELATE $role_id -> role_permission -> $permission_id
       "#)
-      .bind(("role_id", role_id.id().to_string()))
-      .bind(("permission_id", permission_id.id().to_string()))
+      .bind(("role_id", role_id.clone()))
+      .bind(("permission_id", permission_id.clone()))
       .await?
       .take(0)?;
 
@@ -75,13 +59,13 @@ impl PermissionRepository for SurrealPermissionRepository {
     }
   }
 
-  async fn find_by_id(&self, id: &SurrealId) -> Result<Option<Permission>, Error> {
+  async fn find_by_id(&self, id: String) -> Result<Option<Permission>, Error> {
     let result: Option<Permission> = self.db
       .query(r#"
         SELECT * FROM permission 
-        WHERE id = type::thing("permission", $id) AND is_active = true
+        WHERE id = type::thing("permissions", $id) AND is_active = true
       "#)
-      .bind(("id", id.id().to_string()))
+      .bind(("id", id.clone()))
       .await?
       .take(0)?;
     
@@ -91,7 +75,7 @@ impl PermissionRepository for SurrealPermissionRepository {
   async fn find_all(&self) -> Result<Vec<Permission>, Error> {
     let permissions: Vec<Permission> = self.db
       .query(r#"
-        SELECT * FROM permission 
+        SELECT * FROM permissions
         WHERE is_active = true
       "#)
       .await?
@@ -100,31 +84,31 @@ impl PermissionRepository for SurrealPermissionRepository {
     Ok(permissions)
   }
 
-  async fn update(&self, id: &SurrealId, permission: &Permission) -> Result<Permission, Error> {
+  async fn update(&self, id: String, permission: &Permission) -> Result<Permission, Error> {
     let result: Option<Permission> = self.db
       .query(r#" 
-        UPDATE permission 
+        UPDATE permissions
         SET name = $name, description = $description, resource = $resource, action = $action 
-        WHERE id = type::thing("permission", $id) AND is_active = true
+        WHERE id = type::thing("permissions", $id) AND is_active = true
       "#)
-      .bind(("id", id.id().to_string()))
-      .bind(("name", &permission.name))
-      .bind(("description", &permission.description))
-      .bind(("resource", &permission.resource))
-      .bind(("action", &permission.action))
+      .bind(("id", id))
+      .bind(("name", permission.name.clone()))
+      .bind(("description", permission.description.clone()))
+      .bind(("resource", permission.resource.clone()))
+      .bind(("action", permission.action.clone()))
       .await?
       .take(0)?;
     
     result.ok_or(Error::PermissionNotFound)
   }
 
-  async fn delete(&self, id: &SurrealId) -> Result<(), Error> {
+  async fn delete(&self, id: String) -> Result<(), Error> {
     let result: Option<Permission> = self.db
       .query(r#"
         UPDATE permission SET is_active = false 
-        WHERE id = type::thing("permission", $id) AND is_active = true
+        WHERE id = type::thing("permissions", $id) AND is_active = true
       "#)
-      .bind(("id", id.id().to_string()))
+      .bind(("id", id.clone()))
       .await?
       .take(0)?;
     
@@ -134,15 +118,15 @@ impl PermissionRepository for SurrealPermissionRepository {
     }
   }
 
-  async fn remove_permission_from_role(&self, role_id: &SurrealId, permission_id: &SurrealId) -> Result<(), Error> {
+  async fn remove_permission_from_role(&self, role_id: String, permission_id: String) -> Result<(), Error> {
     let result: Option<()> = self.db
       .query(r#"
         DELETE FROM role_permission 
-        WHERE in = type::thing("role", $role_id) 
-        AND out = type::thing("permission", $permission_id)
+        WHERE in = type::thing("roles", $role_id) 
+        AND out = type::thing("permissions", $permission_id)
       "#)
-      .bind(("role_id", role_id.id().to_string()))
-      .bind(("permission_id", permission_id.id().to_string()))
+      .bind(("role_id", role_id.clone()))
+      .bind(("permission_id", permission_id.clone()))
       .await?
       .take(0)?;
     

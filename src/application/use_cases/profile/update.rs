@@ -1,5 +1,7 @@
+use std::str::FromStr;
+use surrealdb::sql::Thing;
+
 use crate::domain::entities::profile::Profile;
-use crate::domain::value_objects::surreal_id::SurrealId;
 use crate::domain::repositories::profile_repository::ProfileRepository;
 use crate::domain::error::Error;
 
@@ -26,9 +28,9 @@ impl<T> UpdateProfileUseCase<T> where T: ProfileRepository {
       return Err(Error::TokenExpired);
     }
 
-    let user_id = SurrealId::new("user", claims.sub.as_str());
+    let user_id = Thing::from_str(claims.sub.as_str()).unwrap();
 
-    let profile = self.profile_repository.find_by_user_id(&user_id).await?;
+    let profile = self.profile_repository.find_by_user_id(user_id.to_string()).await?;
 
         match profile {
           None => return Err(Error::ProfileNotFound),
@@ -46,11 +48,11 @@ impl<T> UpdateProfileUseCase<T> where T: ProfileRepository {
           request.birth_date.clone().unwrap_or(profile.birth_date.clone()),
         );
         
-        let updated_profile = self.profile_repository.update(&profile.surreal_id, &payload).await?;
+        let updated_profile = self.profile_repository.update(profile.id.clone().unwrap().id.to_string(), &payload).await?;
         
         Ok(ProfileResponse {
-          id: updated_profile.surreal_id.id().to_string(),
-          user_id: updated_profile.user_id.id().to_string(),
+          id: updated_profile.id.clone().unwrap().id.to_string(),
+          user_id: updated_profile.user_id.to_string(),
           first_name: updated_profile.first_name,
           last_name: updated_profile.last_name,
           phone: updated_profile.phone,

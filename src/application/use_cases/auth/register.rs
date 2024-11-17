@@ -1,10 +1,13 @@
+use std::str::FromStr;
+use surrealdb::sql::Thing;
+
 use crate::domain::repositories::{
   user_repository::UserRepository,
   token_repository::TokenRepository,
 };
 use crate::domain::entities::user::User;
 use crate::domain::error::Error;
-use crate::domain::value_objects::{user_types::UserType, user_status::UserStatus, surreal_id::SurrealId};
+use crate::domain::value_objects::{user_types::UserType, user_status::UserStatus};
 use crate::application::dtos::register::{register_request::RegisterRequest, register_response::RegisterResponse, register_response::ProfileStatus};
 use crate::domain::services::token::TokenService;
 
@@ -72,11 +75,11 @@ where
         Err(_) => return Err(Error::RegistrationFailed)
       };
 
-    let user_with_roles_and_permissions = self.user_repository.find_by_id(&user.surreal_id).await?.unwrap();
+    let user_with_roles_and_permissions = self.user_repository.find_by_id(user.id.clone().unwrap().id.to_string()).await?.unwrap();
     let roles = user_with_roles_and_permissions.roles.as_ref().unwrap().clone();
     
     // Assign roles to the user
-    self.user_repository.assign_roles(&user.surreal_id, roles).await?;
+    self.user_repository.assign_roles(user.id.clone().unwrap().id.to_string(), roles).await?;
 
     // Create refresh token
     let new_refresh_token = self.token_service.generate_refresh_token(&user_with_roles_and_permissions)?;
@@ -101,10 +104,10 @@ where
   }
 
   async fn validate_admin_permissions(&self, creator_id: &str) -> Result<(), Error> {
-    let creator_id = SurrealId::new("user", creator_id);
+    let creator_id = Thing::from_str(creator_id).unwrap();
     
     let creator = self.user_repository
-      .find_by_id(&creator_id)
+      .find_by_id(creator_id.to_string())
       .await?
       .ok_or(Error::UnauthorizedOperation)?;
 

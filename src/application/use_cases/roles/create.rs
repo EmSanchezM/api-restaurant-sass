@@ -19,10 +19,10 @@ impl<T> CreateRoleUseCase<T> where T: RoleRepository {
     let role = self.role_repository.create(&new_role).await?;
 
     Ok(RoleResponse { 
-      id: role.surreal_id.to_string(),
-      name: role.name,
-      description: role.description,
-      hierarchy_level: role.hierarchy_level,
+      id: role.id.clone().unwrap().id.to_string(),
+      name: role.name.clone(),
+      description: role.description.clone(),
+      hierarchy_level: role.hierarchy_level.clone(),
       is_active: role.is_active,
       created_at: role.created_at
     })

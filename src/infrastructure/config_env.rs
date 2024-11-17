@@ -28,15 +28,13 @@ impl Config {
       token_config: TokenConfig {
         access_token_secret: std::env::var("ACCESS_TOKEN_SECRET")
           .map_err(|_| Error::ConfigError("ACCESS_TOKEN_SECRET not set".to_string()))?,
-        refresh_token_secret: std::env::var("REFRESH_TOKEN_SECRET")
-          .map_err(|_| Error::ConfigError("REFRESH_TOKEN_SECRET not set".to_string()))?,
         access_token_duration: Duration::from_secs(30*60), // 30 minutos en segundos
         refresh_token_duration: Duration::from_secs(7 *24 * 60 * 60), // 7 días en segundos
       },
       database: DatabaseConfig {
-        url: std::env::var("SURREAL_DB_URL").expect("SURREAL_DB_URL must be set"),
-        namespace: std::env::var("SURREAL_DB_NAMESPACE").expect("SURREAL_DB_NAMESPACE must be set"),
-        database: std::env::var("SURREAL_DB_DATABASE").expect("SURREAL_DB_DATABASE must be set"),
+        url: std::env::var("DATABASE_URL").expect("DATABASE_URL must be set"),
+        namespace: std::env::var("DATABASE_NAMESPACE").expect("SURREAL_DB_NAMESPACE must be set"),
+        database: std::env::var("DATABASE_DATABASE").expect("SURREAL_DB_DATABASE must be set"),
       },
       server: ServerConfig {
         host: std::env::var("SERVER_HOST").expect("SERVER_HOST must be set"),

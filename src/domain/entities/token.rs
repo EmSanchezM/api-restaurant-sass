@@ -1,7 +1,6 @@
 use serde::{Deserialize, Serialize};
 use chrono::{DateTime, Utc};
-
-use crate::domain::value_objects::surreal_id::SurrealId;
+use surrealdb::sql::Thing;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AccessToken {
@@ -11,9 +10,8 @@ pub struct AccessToken {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RefreshToken {
-  #[serde(rename = "id")]
-  pub surreal_id: SurrealId,
-  pub user_id: SurrealId,
+  pub id: Option<Thing>,
+  pub user_id: Thing,
   pub token: String,
   pub access_token: String,
   pub expires_at: DateTime<Utc>,
@@ -23,9 +21,9 @@ pub struct RefreshToken {
 }
 
 impl RefreshToken {
-  pub fn new(user_id: SurrealId, token: String, access_token: String, expires_at: DateTime<Utc>) -> Self {
+  pub fn new(user_id: Thing, token: String, access_token: String, expires_at: DateTime<Utc>) -> Self {
     Self { 
-      surreal_id: SurrealId::generate("refresh_token"), 
+      id: None,
       user_id, 
       token, 
       access_token, 

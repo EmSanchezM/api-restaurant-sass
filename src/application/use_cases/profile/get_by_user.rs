@@ -1,4 +1,6 @@
-use crate::domain::value_objects::surreal_id::SurrealId;
+use std::str::FromStr;
+use surrealdb::sql::Thing;
+
 use crate::domain::repositories::profile_repository::ProfileRepository;
 use crate::application::dtos::profile::profile_response::ProfileResponse;
 use crate::domain::error::Error;
@@ -22,15 +24,15 @@ impl<T> GetProfileByUserUseCase<T> where T: ProfileRepository {
       return Err(Error::TokenExpired);
     }
 
-    let user_id = SurrealId::new("user", claims.sub.as_str());
+    let user_id = Thing::from_str(claims.sub.as_str()).unwrap();
 
-    let profile = self.profile_repository.find_by_user_id(&user_id).await?;
+    let profile = self.profile_repository.find_by_user_id(user_id.to_string()).await?;
     
     match profile {
       None => Err(Error::ProfileNotFound),
       Some(profile) => Ok(ProfileResponse {
-        id: profile.surreal_id.id().to_string(),
-        user_id: profile.user_id.id().to_string(),
+        id: profile.id.clone().unwrap().id.to_string(),
+        user_id: profile.user_id.to_string(),
         first_name: profile.first_name,
         last_name: profile.last_name,
         phone: profile.phone,

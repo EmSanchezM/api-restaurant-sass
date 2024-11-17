@@ -27,6 +27,7 @@ pub async fn run(config: Config) -> std::io::Result<()> {
       .configure(routes::role_routes::routes)
       .configure(routes::permission_routes::routes)
       .configure(routes::profile_routes::routes)
+      .configure(routes::health_check_routes::routes)
   })
   .bind(address)
   .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?

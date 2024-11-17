@@ -1,6 +1,5 @@
 use crate::domain::repositories::role_repository::RoleRepository;
 use crate::domain::error::Error;
-use crate::domain::value_objects::surreal_id::SurrealId;
 
 pub struct RemoveRoleUseCase<T> where T: RoleRepository {
   role_repository: T,
@@ -12,8 +11,7 @@ impl<T> RemoveRoleUseCase<T> where T: RoleRepository {
   }
 
   pub async fn execute(&self, id: &str) -> Result<(), Error> {
-    let role_id = SurrealId::new("role", id);
-    let role = self.role_repository.find_by_id(&role_id).await?;
+    let role = self.role_repository.find_by_id(id.to_string()).await?;
 
     if role.is_none() {
       return Err(Error::RoleNotFound);
@@ -21,7 +19,7 @@ impl<T> RemoveRoleUseCase<T> where T: RoleRepository {
     
     let role = role.unwrap();
 
-    self.role_repository.delete(&role.surreal_id).await?;
+    self.role_repository.delete(role.id.clone().unwrap().id.to_string()).await?;
     Ok(())
   }
 }

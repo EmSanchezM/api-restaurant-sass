@@ -1,7 +1,9 @@
+use std::str::FromStr;
+use surrealdb::sql::Thing;
+
 use crate::domain::repositories::token_repository::TokenRepository;
 use crate::domain::error::Error;
 use crate::domain::services::token::TokenService;
-use crate::domain::value_objects::surreal_id::SurrealId;
 
 pub struct LogoutUseCase<T> where T: TokenRepository {
   token_repository: T,
@@ -20,9 +22,9 @@ impl<T> LogoutUseCase<T> where T: TokenRepository {
       return Err(Error::TokenExpired);
     }
 
-    let user_id = SurrealId::new("user", claims.sub.as_str());
+    let user_id = Thing::from_str(claims.sub.as_str()).unwrap();
 
-    self.token_repository.invalidate_refresh_token(&user_id).await?;
+    self.token_repository.invalidate_refresh_token(user_id.to_string()).await?;
     Ok(())
   }
 }

@@ -1,13 +1,13 @@
 use serde::{Deserialize, Serialize};
 use chrono::{DateTime, Utc};
+use surrealdb::sql::Thing;
 
-use crate::domain::value_objects::{surreal_id::SurrealId, address::Address, emergency_contact::EmergencyContact};
+use crate::domain::value_objects::{address::Address, emergency_contact::EmergencyContact};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Profile {
-  #[serde(rename = "id")]
-  pub surreal_id: SurrealId,
-  pub user_id: SurrealId,
+  pub id: Option<Thing>,
+  pub user_id: Thing,
   pub first_name: String,
   pub last_name: String,
   pub phone: String,
@@ -22,9 +22,9 @@ pub struct Profile {
 }
 
 impl Profile {
-  pub fn new(user_id: SurrealId, first_name: String, last_name: String, phone: String, address: Address, position: Option<String>, avatar: Option<String>, emergency_contact: Option<EmergencyContact>, birth_date: DateTime<Utc>) -> Self {
+  pub fn new(user_id: Thing, first_name: String, last_name: String, phone: String, address: Address, position: Option<String>, avatar: Option<String>, emergency_contact: Option<EmergencyContact>, birth_date: DateTime<Utc>) -> Self {
     Self { 
-      surreal_id: SurrealId::generate("profile"),
+      id: None,
       user_id,
       first_name,
       last_name,

@@ -1,5 +1,4 @@
 use crate::domain::entities::role::Role;
-use crate::domain::value_objects::surreal_id::SurrealId;
 use crate::domain::repositories::role_repository::RoleRepository;
 use crate::domain::error::Error;
 
@@ -16,18 +15,18 @@ impl<T> UpdateRoleUseCase<T> where T: RoleRepository {
   }
 
   pub async fn execute(&self, id: &str, request: &UpdateRoleRequest) -> Result<RoleResponse, Error> {
-    let role_id = SurrealId::new("role", id);
-    let role = self.role_repository.find_by_id(&role_id).await?;
+    
+    let role = self.role_repository.find_by_id(id.to_string()).await?;
 
     if role.is_none() {
       return Err(Error::RoleNotFound);
     }
 
     let payload = Role::new(request.name.clone().unwrap(), request.description.clone().unwrap(), request.hierarchy_level.unwrap());
-    let updated_role = self.role_repository.update(&role.unwrap().surreal_id, &payload).await?;
+    let updated_role = self.role_repository.update(role.unwrap().id.clone().unwrap().id.to_string(), &payload).await?;
 
     Ok(RoleResponse {
-      id: updated_role.surreal_id.id().to_string(),
+      id: updated_role.id.clone().unwrap().id.to_string(),
       name: updated_role.name,
       description: updated_role.description,
       hierarchy_level: updated_role.hierarchy_level,

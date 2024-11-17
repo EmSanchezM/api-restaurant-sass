@@ -1,4 +1,3 @@
-use crate::domain::value_objects::surreal_id::SurrealId;
 use crate::domain::repositories::role_repository::RoleRepository;
 use crate::application::dtos::roles::role_response::RoleResponse;
 use crate::domain::error::Error;
@@ -13,8 +12,8 @@ impl<T> GetRoleByIdUseCase<T> where T: RoleRepository {
   }
 
   pub async fn execute(&self, id: &str) -> Result<RoleResponse, Error> {
-    let role_id = SurrealId::new("role", id);
-    let role = self.role_repository.find_by_id(&role_id).await?;
+    
+    let role = self.role_repository.find_by_id(id.to_string()).await?;
 
     if role.is_none() {
       return Err(Error::RoleNotFound);
@@ -23,7 +22,7 @@ impl<T> GetRoleByIdUseCase<T> where T: RoleRepository {
     let role = role.unwrap();
 
     Ok(RoleResponse {
-      id: role.surreal_id.id().to_string(),
+      id: role.id.clone().unwrap().id.to_string(),
       name: role.name,
       description: role.description,
       hierarchy_level: role.hierarchy_level,

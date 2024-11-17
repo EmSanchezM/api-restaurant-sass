@@ -1,6 +1,5 @@
 use crate::domain::repositories::permission_repository::PermissionRepository;
 use crate::domain::error::Error;
-use crate::domain::value_objects::surreal_id::SurrealId;
 
 pub struct RemovePermissionUseCase<T> where T: PermissionRepository {
   permission_repository: T,
@@ -12,13 +11,12 @@ impl<T> RemovePermissionUseCase<T> where T: PermissionRepository {
   }
 
   pub async fn execute(&self, id: &str) -> Result<(), Error> {
-    let permission_id = SurrealId::new("permission", id);
-    let permission = self.permission_repository.find_by_id(&permission_id).await?;
+    let permission = self.permission_repository.find_by_id(id.to_string()).await?;
 
     match permission {
       None => return Err(Error::PermissionNotFound),
       Some(permission) => {
-        self.permission_repository.delete(&permission.surreal_id).await?;
+        self.permission_repository.delete(permission.id.clone().unwrap().id.to_string()).await?;
         Ok(())
       }
     }

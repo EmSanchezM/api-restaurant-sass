@@ -15,7 +15,7 @@ impl<T> GetAllPermissionsUseCase<T> where T: PermissionRepository {
     let permissions = self.permission_repository.find_all().await?;
 
     Ok(permissions.iter().map(|permission| PermissionResponse {
-      id: permission.surreal_id.id().to_string(),
+      id: permission.id.clone().unwrap().id.to_string(),
       name: permission.name.clone(),
       description: permission.description.clone(),
       resource: permission.resource.to_string(),

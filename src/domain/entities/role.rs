@@ -1,12 +1,10 @@
 use serde::{Deserialize, Serialize};
 use chrono::{DateTime, Utc};
-
-use crate::domain::value_objects::surreal_id::SurrealId;
+use surrealdb::sql::Thing;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Role {
-  #[serde(rename = "id")]
-  pub surreal_id: SurrealId,
+  pub id: Option<Thing>,
   pub name: String,
   pub description: String,
   pub hierarchy_level: i32,
@@ -16,6 +14,6 @@ pub struct Role {
 
 impl Role {
   pub fn new(name: String, description: String, hierarchy_level: i32) -> Self {
-    Self { surreal_id: SurrealId::generate("role"), name, description, hierarchy_level, is_active: true, created_at: Utc::now() }
+    Self { id: None, name, description, hierarchy_level, is_active: true, created_at: Utc::now() }
   }
 }

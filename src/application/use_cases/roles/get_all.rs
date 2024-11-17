@@ -15,7 +15,7 @@ impl<T> GetAllRolesUseCase<T> where T: RoleRepository {
     let roles = self.role_repository.find_all().await?;
 
     Ok(roles.iter().map(|role| RoleResponse {
-      id: role.surreal_id.id().to_string(),
+      id: role.id.clone().unwrap().id.to_string(),
       name: role.name.clone(),
       description: role.description.clone(),
       hierarchy_level: role.hierarchy_level,

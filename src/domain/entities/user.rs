@@ -1,14 +1,14 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use surrealdb::sql::Thing;
 
 use crate::domain::entities::role::Role;
 use crate::domain::entities::permission::Permission;
-use crate::domain::value_objects::{surreal_id::SurrealId, user_status::UserStatus, user_types::UserType};
+use crate::domain::value_objects::{user_status::UserStatus, user_types::UserType};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct User {
-  #[serde(rename = "id")]
-  pub surreal_id: SurrealId,
+  pub id: Option<Thing>,
   pub email: String,
   pub password: String,
   pub status: UserStatus,
@@ -27,7 +27,7 @@ pub struct User {
 impl User {
   pub fn new(email: String, password: String, status: UserStatus, user_type: UserType) -> Self {
     Self { 
-      surreal_id: SurrealId::generate("user"), 
+      id: None,
       email, 
       password, 
       status, 
