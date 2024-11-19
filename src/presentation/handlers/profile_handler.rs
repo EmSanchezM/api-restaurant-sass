@@ -18,7 +18,7 @@ use crate::infrastructure::database::surreal_connection::DatabaseConnection;
 use crate::domain::services::token::TokenService;
 use crate::infrastructure::config_env::Config;
 
-#[post("/profile")]
+#[post("/")]
 pub async fn create_profile_handler(
   db_connection: web::Data<DatabaseConnection>,
   config: web::Data<Config>,
@@ -40,7 +40,7 @@ pub async fn create_profile_handler(
     }
 }
 
-#[put("/profile")]
+#[put("/")]
 pub async fn update_profile_handler(
   db_connection: web::Data<DatabaseConnection>,
   config: web::Data<Config>,
@@ -58,7 +58,7 @@ pub async fn update_profile_handler(
     }
 }
 
-#[delete("/profile")]
+#[delete("/")]
 pub async fn delete_profile_handler(
   db_connection: web::Data<DatabaseConnection>,
   config: web::Data<Config>,
@@ -74,7 +74,7 @@ pub async fn delete_profile_handler(
   }
 }
 
-#[get("/profile")]
+#[get("/")]
 pub async fn get_profile_handler(
   db_connection: web::Data<DatabaseConnection>,
   config: web::Data<Config>,
@@ -89,7 +89,7 @@ pub async fn get_profile_handler(
   }
 }
 
-#[get("/profile/{id}")]
+#[get("/{id}")]
 pub async fn get_profile_by_id_handler(
   db_connection: web::Data<DatabaseConnection>,
   id: web::Path<String>

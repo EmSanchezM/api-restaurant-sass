@@ -24,6 +24,15 @@ impl SurrealUserRepository {
 
 #[async_trait]
 impl UserRepository for SurrealUserRepository {
+  async fn find_all(&self) -> Result<Vec<User>, Error> {
+    let users: Vec<User> = self.db
+      .query("SELECT *, profile.* FROM users")
+      .await?
+      .take(0)?;
+
+    Ok(users)
+  }
+
   async fn create(&self, user: &User) -> Result<User, Error> {
     let email = user.email.to_string();
     let password = user.password.to_string();

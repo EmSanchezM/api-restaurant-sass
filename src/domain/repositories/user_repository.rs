@@ -6,6 +6,7 @@ use crate::domain::error::Error;
 
 #[async_trait]
 pub trait UserRepository {
+  async fn find_all(&self) -> Result<Vec<User>, Error>;
   async fn create(&self, user: &User) -> Result<User, Error>;
   async fn find_by_id(&self, id: String) -> Result<Option<User>, Error>;
   async fn find_by_email(&self, email: &str) -> Result<Option<User>, Error>;

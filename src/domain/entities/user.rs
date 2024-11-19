@@ -4,6 +4,7 @@ use surrealdb::sql::Thing;
 
 use crate::domain::entities::role::Role;
 use crate::domain::entities::permission::Permission;
+use crate::domain::entities::profile::Profile;
 use crate::domain::value_objects::{user_status::UserStatus, user_types::UserType};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -13,6 +14,7 @@ pub struct User {
   pub password: String,
   pub status: UserStatus,
   pub user_type: UserType,
+  pub profile: Option<Profile>,
   pub roles: Option<Vec<Role>>,
   pub permissions: Option<Vec<Permission>>,
   pub is_verified: bool,
@@ -39,6 +41,7 @@ impl User {
       locked_until: None,
       roles: None,
       permissions: None,
+      profile: None,
       created_at: Utc::now(), 
       updated_at: Utc::now() 
     }

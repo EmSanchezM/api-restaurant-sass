@@ -16,7 +16,7 @@ use crate::application::use_cases::roles::{
 use crate::infrastructure::repositories::surreal_role_repository::SurrealRoleRepository;
 use crate::infrastructure::database::surreal_connection::DatabaseConnection;
 
-#[post("/roles")]
+#[post("/")]
 pub async fn create_role_handler(
   db_connection: web::Data<DatabaseConnection>,
   request: web::Json<CreateRoleRequest>
@@ -35,7 +35,7 @@ pub async fn create_role_handler(
     }
 }
 
-#[put("/roles/{id}")]
+#[put("/{id}")]
 pub async fn update_role_handler(
   db_connection: web::Data<DatabaseConnection>,
   request: web::Json<UpdateRoleRequest>,
@@ -51,7 +51,7 @@ pub async fn update_role_handler(
     }
 }
 
-#[delete("/roles/{id}")]
+#[delete("/{id}")]
 pub async fn delete_role_handler(
   db_connection: web::Data<DatabaseConnection>,
   id: web::Path<String>
@@ -65,11 +65,13 @@ pub async fn delete_role_handler(
   }
 }
 
-#[get("/roles")]
+#[get("/")]
 pub async fn get_all_roles_handler(
   db_connection: web::Data<DatabaseConnection>
 ) -> HttpResponse {
   let repo = SurrealRoleRepository::new(&db_connection);
+
+  print!("Llega a get_all_roles_handler");
 
   match GetAllRolesUseCase::new(repo).execute().await {
     Ok(roles) => HttpResponse::Ok().json(roles),
@@ -77,7 +79,7 @@ pub async fn get_all_roles_handler(
   }
 }
 
-#[get("/roles/{id}")]
+#[get("/{id}")]
 pub async fn get_role_by_id_handler(
   db_connection: web::Data<DatabaseConnection>,
   id: web::Path<String>

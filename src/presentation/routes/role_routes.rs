@@ -5,6 +5,8 @@ use crate::presentation::handlers::roles_handler::{
 
 //TODO: Agregar middleware para validar token estas rutas seran disponibles solo para usuarios con el rol de super admin
 pub fn routes(config: &mut web::ServiceConfig) {
+  print!("Llega a roles_routes");
+  
   config.service(
     web::scope("/api/v1/roles")
       .service(create_role_handler)

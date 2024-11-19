@@ -3,7 +3,6 @@ use std::time::Duration;
 use serde::{Serialize, Deserialize};
 use chrono::Utc;
 use uuid::Uuid;
-use surrealdb::sql::Thing;
 
 use crate::domain::entities::token::RefreshToken;
 use crate::domain::entities::user::User;
